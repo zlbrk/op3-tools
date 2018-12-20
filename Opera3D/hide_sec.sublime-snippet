@@ -1,0 +1,10 @@
+<snippet>
+	<content><![CDATA[
+SELECT OPTION=HIDE PROPERTY='System' LABEL='Sheet face'
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>hidsec</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.comi</scope>
+</snippet>

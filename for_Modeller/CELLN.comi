@@ -1,0 +1,28 @@
+// Script for the Opera-3d Modeller Version 14.0
+// Display_CellNumber.comi © KJH
+//
+//This script only works if there is a model body
+$DIALOG START 'Display a Cell with a certain Number'
+$GROUPBOX START 'CELL Number?' Vertical 1
+$ASK #CNum 'Please enter the Number of the Cell to be displayed'
+$GROUPBOX STOP
+$DIALOG STOP
+// Do the Job
+// ================
+SELECT OPTION=RESET
+SELECT OPTION=ADD TYPE=CELL NUMBER=#CNum UNIQUEBODYNAME=ModelBody
+THREED OPTION=SETVIEW SIZE=0
+//
+// Regrettably the above doesn't show the surface mesh very well,
+// as the cell being selected is in "Preview" colour, which is
+// blue and translucent by default...
+//
+// So change preview colour to solid yellow
+// ===========================================
+COLOUR OPTION=LOAD Code=3
+COLOUR OPTION=SET RED=255 GREEN=255 BLUE=0 TRANSLUCENT=NO
+//
+// Note that from now on the preview colour is solid yellow,
+// so don’t get confused!
+//
+// end of comi-script

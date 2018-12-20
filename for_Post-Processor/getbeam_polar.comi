@@ -1,0 +1,33 @@
+$string filename %FILEBASENAME(&LOADFILENAME&) |// Имя файла загруженной базы
+$string tracks '&filename&_1.tracks' |// Имя файла траекторий
+VIEW PLOT=DISPLAY FILE='&tracks&', |// Display Particle Trajectories!!!
+    EMITTER=All COLOUR=YES SYMMETRY=YES ERASE=YES
+
+// ----------------------------------------------------------------------------
+// Описание интерфейса
+$DIALOG ACTION=start TITLE='Set beam cross-section properties'
+    $ASK #epp_getbeam_R 'Section radius, mm'
+    $ASK #epp_getbeam_zsec 'Beam plane Z, mm'
+    $ASK #epp_getbeam_xoff 'X offset, mm'
+    $ASK #epp_getbeam_yoff 'Y offset, mm'
+$DIALOG ACTION=STOP
+
+// Обнуление рабочей системы координат
+SET XLOCAL=0 YLOCAL=0 ZLOCAL=0 TLOCAL=0,PLOCAL=0,SLOCAL=0 LOCALACTIVE=YES LOOK=ANYWHERE ABORT=YES
+
+// Переход в локальную систему координат
+SET XLOCAL=#epp_getbeam_xoff YLOCAL=#epp_getbeam_yoff ZLOCAL=#epp_getbeam_zsec, 
+    TLOCAL=0 PLOCAL=0 SLOCAL=0 LOCALACTIVE=YES LOOK=ANYWHERE ABORT=YES
+
+POLAR BUFFER='emitter_type_20',
+    R2=#epp_getbeam_R R3=R2 R1=0 R4=0 Z1=0 Z2=Z1 Z3=Z1, 
+    Z4=Z1 T1=0 T2=0 T3=360 T4=360 N1=16 N2=64
+
+// Создаем файл и записываем в него первый сегмент
+$OPEN 1 &filename&.txt OVERWRITE +REDIRECT
+    BUFFER NAME='emitter_type_20' OPTION=SWITCH
+
+    VIEW PLOT=INTERSECTIONS FILE='&tracks&' SYMMETRY=NO,
+    EMITTER=All SAMPLE=8 COLOUR=FUNCTION,
+    FUNCTION=BEAMLETPOWER STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES
+$CLOSE 1

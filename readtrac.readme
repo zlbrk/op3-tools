@@ -1,0 +1,63 @@
+The READTRAC Utility
+--------------------
+
+READTRAC (Windows) or readtrack (Unix) is a small utility program that reads
+a binary track file and writes it in a portable text format, or reads the 
+text file and produces the binary track file.
+
+READTRAC
+--------
+
+READTRAC/readtrack can be run with no arguments. The program 
+will prompt for required information. Filenames should include extensions
+and should not be "quoted" if there are spaces.
+
+READTRAC/readtrack can also be run with the three required command
+line arguments:
+
+Windows:
+
+READTRAC.EXE   inputfile [A/B] Outputfile
+
+Unix:
+
+readtrack inputfile [A/B] Outputfile
+
+where either A or B should be specified depending upon whether the 
+inputfile is Ascii or Binary.
+Both inputfile and outputfile should be filenames with extensions. Filenames 
+with spaces in must be "quoted".
+
+
+Using READTRAC
+--------------
+
+Run READTRAC.EXE (Windows) or readtrack (Unix)
+Give the name of the text file (including full path and extension) 
+	that has just been created
+Enter A as it is an ascii text file
+Give the full path and name of the output binary file.
+
+
+WINDOWS
+-------
+
+On Microsoft Windows systems the READTRAC utility is located in the bin
+folder in the installation folder.
+
+UNIX
+----
+
+On UNIX systems, the readtrack program is located in the bin directory in
+the installation folder.
+
+
+
+(c) Vector Fields Ltd, 2004 - 2007
+
+Created: Simon Taylor, 6 July, 1999.
+updated  APJ  08-Feb-2000
+updated  GJCA 17-Dec-2004
+updated  CSB  17-Dec-2004
+updates  NJB  26-Nov-2007
+

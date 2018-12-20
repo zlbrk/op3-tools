@@ -1,0 +1,16 @@
+<snippet>
+	<content><![CDATA[
+CYLINDER Name='${1:CylinderName}', 
+    X0=0 Y0=0 Z0=${2:#Bottom_Z}, 
+    X1=0 Y1=0 Z1=${3:#Top_Z}, 
+    -TUBE SHAPECONTROL=SIMPLE, 
+    MAJORRADIUS=${4:#Bottom_Major_R}, 
+    MINORRADIUS=MAJORRADIUS, 
+    TOPRADIUS=MINORRADIUS, 
+    SIDES=2
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>mkcyl</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.comi</scope>
+</snippet>

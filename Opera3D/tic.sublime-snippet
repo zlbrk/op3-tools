@@ -1,0 +1,10 @@
+<snippet>
+	<content><![CDATA[
+// >>TIC -- тег навигации	
+#_tic_s=%int(second,2)+%int(minute,2)*60+%int(hour,2)*60*60
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>tic</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.comi</scope>
+</snippet>

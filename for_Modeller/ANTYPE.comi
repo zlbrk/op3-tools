@@ -1,0 +1,35 @@
+// Пользовательский диалог, позволяющий выбрать тип анализа в моделлере 
+// (замена заблокированного меню Model -> Analysis Type)
+// =====================================================================
+
+// Инициализация пользовательского диалога
+$DIALOG ACTION=START TITLE='Analysis Type'
+	// Выпадающий список типов анализа, доступных в Опере
+	$GROUPBOX START 'Select'
+		$PROMPT NAME=ANTYPE PROMPT='Analysis Type' HISTORY='SCALA TOSCAMAGN TOSCAELEC TOSCACURR TEMPOST TEMPOTR STRESSST STRESSEV SOPRANOSS SOPRANOEV ELEKTRASS ELEKTRATR ELEKTRAVL CARMEN DEMAG QUENCH' EDIT=NO
+	$GROUPBOX STOP
+	
+	// Памятка абонента
+	$GROUPBOX START 'Help' VERTICAL
+		$DISPLAYLINE 'SCALA - space charge beam analysis'
+		$DISPLAYLINE 'TOSCAMAGN - Tosca magnetic'
+		$DISPLAYLINE 'TOSCAELEC - Tosca electrostatic'
+		$DISPLAYLINE 'TOSCACURR - Tosca current flow'
+		$DISPLAYLINE 'TEMPOST - Steady-state thermal analysis'
+		$DISPLAYLINE 'TEMPOTR - Transient thermal analysis'
+		$DISPLAYLINE 'STRESSST - Static stress analysis'
+		$DISPLAYLINE 'STRESSEV - Stress eigenvalue analysis'
+		$DISPLAYLINE 'SOPRANOSS - Steadystate harmonic high frequency analysis'
+		$DISPLAYLINE 'SOPRANOEV - Eigenvalue high frequency analysis'
+		$DISPLAYLINE 'SOPRANOEV - Eigenvalue high frequency analysis'
+		$DISPLAYLINE 'ELEKTRASS - Steady-state harmonic eddy currents'
+		$DISPLAYLINE 'ELEKTRATR - Transient eddy currents'
+		$DISPLAYLINE 'ELEKTRAVL - Velocity induced eddy currents'
+		$DISPLAYLINE 'CARMEN - Motion analysis'
+		$DISPLAYLINE 'DEMAG - Transient magnetization of permanent magnets'
+		$DISPLAYLINE 'QUENCH - Transient thermal analysis of superconducting magnets'
+	$GROUPBOX STOP
+$DIALOG STOP
+
+// Установка выбранного типа анализа в качестве текущего
+ANALYSISDATA OPTION=SET PROGRAM=&ANTYPE& 

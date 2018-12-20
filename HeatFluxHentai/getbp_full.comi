@@ -1,0 +1,184 @@
+// ----------------------------------------------------------------------------------------------
+// Скрипт для многолучевой системы
+// ----------------------------------------------------------------------------------------------
+// Поворачиваем систему координат так, чтобы плоскость симметрии не пересекала боковые пучки
+// SET XLOCAL=0 YLOCAL=0 ZLOCAL=0 PLOCAL=0 TLOCAL=0 SLOCAL=-90 LOCALACTIVE=YES LOOK=ANYWHERE ABORT=YES
+
+$string filename %FILEBASENAME(&LOADFILENAME&) |// Имя файла загруженной базы
+$string filepath %FILEPATH(&LOADFILENAME&) |// Имя файла загруженной базы
+$string tracks '&filename&_%int(CASE).tracks' |// Имя файла траекторий
+
+SYMMETRY MODELSYMMETRY=USER RXY=NO RYZ=NO RZX=NO SYMMETRY=2 SAVE=NO 
+
+VIEW PLOT=DISPLAY FILE='&tracks&', |// Display Particle Trajectories!!!
+    EMITTER=All COLOUR=YES SYMMETRY=YES ERASE=YES
+
+$string YESORNO 'YES' |// Разрешать перезаписывать существующие файлы
+
+
+#epp_GETHEATFLUX=1 |// Формат вывода информации о пересечении пучка с поверхностью. 
+// 1 - формируется последовательность таблиц для использования с нативным решателем Оперы
+// 0 - формируется единый файл, содержащий кучу точечных источников. Использования с самодельным решателем
+
+
+#E_Ua=28000 |// Ускоряющее напряжение, В
+
+// Определяем кол-во точек по границам буфферов 
+#epp_LPTS=64/2 |// По длине
+#epp_APTS=256/2 |// По дуге
+#epp_SMPL=8
+
+#epp_T1=-30
+#epp_T3=180+60
+
+// Определяем радиусы буфферов. Они должны быть несколько меньше радиусов, определяющих поверхность коллектора, чтобы траектория пересекала поверхность буфера.
+#epp_R1=25.95
+#epp_R2=29.45
+#epp_R3=4.95
+#epp_R4=0.01
+
+// Первый сегмент.
+#_N1=#epp_LPTS/4
+#_N2=#epp_APTS/2
+POLAR BUFFER='bpm_patch_1', 
+    N1=#_N1 N2=#_N2, 
+    R1=#epp_R1 R2=R1 R3=R1 R4=R1, 
+    T1=#epp_T1 T2=T1 T3=#epp_T3 T4=T3, 
+    Z1=130 Z2=119.5 Z3=Z2 Z4=Z1
+MAP  FILE=TEMP CONTOUR=ZONES COMPONENT=v MIN=* MAX=* GRID=YES VECTOR=NO ERASE=YES PRINT=NO
+
+$IF #epp_GETHEATFLUX==1
+    VIEW PLOT=TEMP FILE='&tracks&', 
+        EMITTER=All SAMPLE=#epp_SMPL, 
+        SYMMETRY=YES PRINT=NO, 
+        STOPAFTERFIRST=YES, 
+        FUNCTION=CURRENT
+    TABLE COLUMNS=3 INFILE=TEMP bpm_patch_1, 
+        OUTFILE='&filepath&\PD1.table', 
+        F1=ATAN2D(Y;X) NAME1=Theta UNIT1T=1,
+        F2=Z NAME2=Z UNIT2T=LENGU,
+        F3=JBEAM*#E_Ua NAME3=PD1 UNIT3T=POWEU/LENGU^2
+$ELIF #epp_GETHEATFLUX==0
+    // -----------------------------------------------------------------------
+    // Создаем файл и записываем в него первый сегмент
+    $OPEN 1 beamletpower.txt OVERWRITE +REDIRECT
+        BUFFER NAME='bpm_patch_1' OPTION=SWITCH
+        VIEW PLOT=INTERSECTIONS FILE='&tracks&' SYMMETRY=YES,
+        EMITTER=All SAMPLE=#epp_SMPL COLOUR=FUNCTION,
+        FUNCTION=BEAMLETPOWER STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES
+    $CLOSE 1
+$ELSE
+    $DISPLAYLINE 'Something goes wrong!'
+$END IF   
+
+// Второй сегмент.
+#_N1=#epp_LPTS/2
+#_N2=#epp_APTS/2
+POLAR BUFFER='bpm_patch_2' N1=#_N1 N2=#_N2, 
+    R1=#epp_R2 T1=#epp_T1 Z1=150 R2=#epp_R1 T2=T1 Z2=130 R3=#epp_R1 T3=#epp_T3 Z3=Z2 R4=#epp_R2 T4=T3 Z4=Z1
+MAP  FILE=TEMP CONTOUR=ZONES COMPONENT=v MIN=* MAX=* GRID=YES VECTOR=NO ERASE=NO PRINT=NO
+
+$IF #epp_GETHEATFLUX==1
+    VIEW PLOT=TEMP FILE='&tracks&' EMITTER=All SAMPLE=#epp_SMPL SYMMETRY=YES PRINT=NO STOPAFTERFIRST=YES FUNCTION=CURRENT
+    TABLE COLUMNS=3 INFILE=TEMP bpm_patch_2 OUTFILE='&filepath&\PD2.table', 
+        F1=ATAN2D(Y;X) NAME1=Theta UNIT1T=1,
+        F2=Z NAME2=Z UNIT2T=LENGU,
+        F3=JBEAM*#E_Ua NAME3=PD2 UNIT3T=POWEU/LENGU^2
+$ELIF #epp_GETHEATFLUX==0
+    // -----------------------------------------------------------------------
+    // Дописываем в ранее созданный файл второй сегмент
+    // -----------------------------------------------------------------------
+    $OPEN 1 beamletpower.txt APPEND +REDIRECT
+        BUFFER NAME='bpm_patch_2' OPTION=SWITCH
+        VIEW PLOT=INTERSECTIONS  FILE='&tracks&' SYMMETRY=YES,
+        EMITTER=All SAMPLE=#epp_SMPL COLOUR=FUNCTION,
+        FUNCTION=BEAMLETPOWER STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES
+    $CLOSE 1
+$ELSE
+        $DISPLAYLINE 'Something goes wrong!'
+$END IF
+
+// Третий сегмент.
+#_N1=#epp_LPTS/2
+#_N2=#epp_APTS/2
+POLAR BUFFER='bpm_patch_3' N1=#_N1 N2=#_N2, 
+    R1=#epp_R2 R2=R1 R3=R1 R4=R1 T1=#epp_T1 T2=T1 T3=#epp_T3 T4=T3 Z2=150 Z3=Z2 Z1=177.5 Z4=Z1
+MAP  FILE=TEMP CONTOUR=ZONES COMPONENT=v MIN=* MAX=* GRID=YES VECTOR=NO ERASE=NO PRINT=NO
+
+$IF #epp_GETHEATFLUX==1
+    VIEW PLOT=TEMP  FILE='&tracks&' EMITTER=All SAMPLE=#epp_SMPL SYMMETRY=YES PRINT=NO STOPAFTERFIRST=YES FUNCTION=CURRENT
+    TABLE COLUMNS=3 INFILE=TEMP bpm_patch_3 OUTFILE='&filepath&\PD3.table', 
+        F1=ATAN2D(Y;X) NAME1=Theta UNIT1T=1,
+        F2=Z NAME2=Z UNIT2T=LENGU,
+        F3=JBEAM*#E_Ua NAME3=PD3 UNIT3T=POWEU/LENGU^2
+$ELIF #epp_GETHEATFLUX==0
+    // -----------------------------------------------------------------------
+    // Дописываем в ранее созданный файл третий сегмент
+    // -----------------------------------------------------------------------
+    $OPEN 1 beamletpower.txt APPEND +REDIRECT
+        BUFFER NAME='bpm_patch_3' OPTION=SWITCH
+        VIEW PLOT=INTERSECTIONS  FILE='&tracks&' SYMMETRY=YES,
+        EMITTER=All SAMPLE=#epp_SMPL COLOUR=FUNCTION,
+        FUNCTION=BEAMLETPOWER STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES
+    $CLOSE 1
+$ELSE
+        $DISPLAYLINE 'Something goes wrong!'
+$END IF
+
+// Четвертый сегмент.
+#_N1=#epp_LPTS*2
+#_N2=#epp_APTS/2
+POLAR BUFFER='bpm_patch_4' N1=#_N1 N2=#_N2,
+    R1=#epp_R3 T1=#epp_T1 Z1=272.5 R2=#epp_R2 T2=T1 Z2=177.5 R3=#epp_R2 T3=#epp_T3 Z3=Z2 R4=#epp_R3 T4=T3 Z4=Z1
+MAP  FILE=TEMP CONTOUR=ZONES COMPONENT=v MIN=* MAX=* GRID=YES VECTOR=NO ERASE=NO PRINT=NO
+
+$IF #epp_GETHEATFLUX==1
+    VIEW PLOT=TEMP FILE='&tracks&' EMITTER=All SAMPLE=#epp_SMPL SYMMETRY=YES PRINT=NO STOPAFTERFIRST=YES FUNCTION=CURRENT
+    TABLE COLUMNS=3 INFILE=TEMP bpm_patch_4 OUTFILE='&filepath&\PD4.table', 
+        F1=ATAN2D(Y;X) NAME1=Theta UNIT1T=1,
+        F2=Z NAME2=Z UNIT2T=LENGU,
+        F3=JBEAM*#E_Ua NAME3=PD4 UNIT3T=POWEU/LENGU^2
+$ELIF #epp_GETHEATFLUX==0
+    // -----------------------------------------------------------------------
+    // Дописываем в ранее созданный файл четвертый сегмент
+    // -----------------------------------------------------------------------
+    $OPEN 1 beamletpower.txt APPEND +REDIRECT
+        BUFFER NAME='bpm_patch_4' OPTION=SWITCH
+        VIEW PLOT=INTERSECTIONS  FILE='&tracks&' SYMMETRY=YES,
+        EMITTER=All SAMPLE=#epp_SMPL COLOUR=FUNCTION,
+        FUNCTION=BEAMLETPOWER STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES
+    $CLOSE 1
+$ELSE
+        $DISPLAYLINE 'Something goes wrong!'
+$END IF
+
+// Пятый сегмент.
+#_N1=#epp_LPTS/4
+#_N2=#epp_APTS/8
+POLAR BUFFER='bpm_patch_5' N1=#_N1 N2=#_N2,
+    R1=#epp_R4 T1=#epp_T1 Z1=277.4 R2=#epp_R3 T2=T1 Z2=272.5 R3=#epp_R3 T3=#epp_T3 Z3=Z2 R4=#epp_R4 Z4=Z1
+MAP FILE=TEMP CONTOUR=ZONES COMPONENT=v MIN=* MAX=* GRID=YES VECTOR=NO ERASE=NO PRINT=NO
+
+$IF #epp_GETHEATFLUX==1
+    VIEW PLOT=TEMP FILE='&tracks&' EMITTER=All SAMPLE=#epp_SMPL SYMMETRY=YES PRINT=NO STOPAFTERFIRST=YES FUNCTION=CURRENT
+    TABLE COLUMNS=3 INFILE=TEMP bpm_patch_5 OUTFILE='&filepath&\PD5.table', 
+        F1=ATAN2D(Y;X) NAME1=Theta UNIT1T=1,
+        F2=Z NAME2=Z UNIT2T=LENGU,
+        F3=JBEAM*#E_Ua NAME3=PD1 UNIT3T=POWEU/LENGU^2
+$ELIF #epp_GETHEATFLUX==0
+    // -----------------------------------------------------------------------
+    // Дописываем в ранее созданный файл пятый сегмент
+    // -----------------------------------------------------------------------
+    $OPEN 1 beamletpower.txt APPEND +REDIRECT
+        BUFFER NAME='bpm_patch_5' OPTION=SWITCH
+        VIEW PLOT=INTERSECTIONS  FILE='&tracks&' SYMMETRY=YES,
+        EMITTER=All SAMPLE=#epp_SMPL COLOUR=FUNCTION,
+        FUNCTION=BEAMLETPOWER STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES
+    $CLOSE 1
+$ELSE
+    $DISPLAYLINE 'Something goes wrong!'
+$END IF
+
+$DIALOG ACTION=start TITLE='REPORT'
+        $DISPLAYLINE 'DONE!'
+$DIALOG ACTION=STOP

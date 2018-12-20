@@ -1,0 +1,13 @@
+<snippet>
+	<content><![CDATA[
+BLOCK Name='SX_${1:name}',
+	X0=${2:#_} X1=X0,
+	Y0=#Domain_Y0 Y1=#Domain_Y1,
+	Z0=#Domain_Z0 Z1=#Domain_Z1
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>xsec</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.comi</scope>
+</snippet>

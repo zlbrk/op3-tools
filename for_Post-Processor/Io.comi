@@ -1,0 +1,31 @@
+// ----------------------------------------
+// Определяем имена загруженных файлов
+$string op3_name %FILEBASENAME(&LOADFILENAME&) |// Имя файла загруженной базы
+$string case_num %int(CASE) |// Порядковый номер симуляции.
+$string tracks_file '&op3_name&_&case_num&.tracks' |// Имя файла траекторий
+
+VIEW PLOT=DISPLAY FILE='&tracks_file&', |// Display Particle Trajectories!!!
+    EMITTER=All COLOUR=YES SYMMETRY=YES ERASE=YES
+
+// ----------------------------------------
+// Создаем буфер на всю поперечную площадь
+CARTESIAN BUFFER='Io', 
+    X1=#Domain_X0 Y1=#Domain_Y0,
+    X3=#Domain_X1  Y3=#Domain_Y1,
+    Z1=#E_Anode_Z0-#E_SD Z2=Z1 Z3=Z1 Z4=Z1,
+    X2=X3 Y2=Y1 X4=X1 Y4=Y3, 
+    CORNERS=4 N1=32 N2=32
+
+MAP FILE=TEMP COMPONENT=V
+
+// ----------------------------------------
+// Вычисляем ток, пересекающий площадку
+
+BUFFER NAME='&VF_MAPBUF&' OPTION=SWITCH
+VIEW PLOT=TEMP  FILE='&tracks_file&' EMITTER=All SAMPLE=0 SYMMETRY=YES PRINT=NO STOPAFTERFIRST=YES FUNCTION=CURRENT 
+
+$DIALOG START 'Total anode current'
+$DISPLAYLINE '' 
+$DISPLAYLINE 'Io = %real(TOTALCURRENT*1e3) mA'
+$DISPLAYLINE '' 
+$DIALOG STOP

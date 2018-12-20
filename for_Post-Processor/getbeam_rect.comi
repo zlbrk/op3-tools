@@ -1,0 +1,47 @@
+// ----------------------------------------------------------------------------
+// Определяем имя загруженной базы и файла траекторий
+$string filename %FILEBASENAME(&LOADFILENAME&) |// Имя файла загруженной базы
+$string tracks '&filename&_1.tracks' |// Имя файла траекторий
+
+// ----------------------------------------------------------------------------
+// Определяем параметры буфера по умолчанию
+#epp_getbeam_x0=#Domain_X0
+#epp_getbeam_x1=#Domain_X1
+#epp_getbeam_y0=#Domain_Y0
+#epp_getbeam_y1=#Domain_Y1
+#epp_getbeam_zsec=#Domain_Z1-0.01
+
+// ----------------------------------------------------------------------------
+// Описание интерфейса
+$DIALOG ACTION=start TITLE='Set beam cross-section properties'
+    $ASK #epp_getbeam_x0 'Left boundary X0, mm'
+    $ASK #epp_getbeam_x1 'Right boundary X1, mm'
+    $ASK #epp_getbeam_y0 'Bottom boundary Y0, mm'
+    $ASK #epp_getbeam_y1 'Top boundary Y1, mm'
+    $ASK #epp_getbeam_zsec 'Beam plane Z, mm'
+$DIALOG ACTION=STOP 
+
+// VIEW PLOT=DISPLAY FILE='&tracks&', |// Display Particle Trajectories!!!
+//     EMITTER=All COLOUR=YES SYMMETRY=YES ERASE=YES
+
+// ----------------------------------------------------------------------------
+// Создаем декартов буфер для экспорта пучка
+CARTESIAN BUFFER='emitter_type_20', 
+    X1=#epp_getbeam_x0  X3=#epp_getbeam_x1 X2=X3 X4=X1, 
+    Y1=#epp_getbeam_y0 Y2=Y1 Y3=#epp_getbeam_y1 Y4=Y3, 
+    Z1=#epp_getbeam_zsec Z2=Z1 Z3=Z1 Z4=Z1, 
+    CORNERS=4 N1=16 N2=8
+
+// ----------------------------------------------------------------------------
+// Создаем файл и записываем в него параметры пучка в сечении
+$OPEN 1 &filename&.txt OVERWRITE +REDIRECT
+    BUFFER NAME='emitter_type_20' OPTION=SWITCH
+
+    VIEW PLOT=INTERSECTIONS FILE='&tracks&' XAXIS=X YAXIS=Y,
+    SYMMETRY=NO EMITTER=All SAMPLE=8 COLOUR=FUNCTION,
+    STOPAFTERFIRST=YES ERASE=YES LINE=NO PRINT=YES FUNCTION=BEAMLETPOWER
+$CLOSE 1
+
+// ----------------------------------------------------------------------------
+// Формируем emit-файл с помощью утилиты mkemit
+$exec 'F:\USER_LOCAL\Opera15R3x64\toolbox\bin\mkemit.exe' arguments='&filename&.txt'

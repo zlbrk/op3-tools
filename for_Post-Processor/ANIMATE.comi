@@ -1,0 +1,14 @@
+// ----------------------------------------------------------------------------
+// Описание интерфейса
+$DIALOG ACTION=start TITLE='Set AC parameters'
+    $ASK #ENDPHASE 'End phase, Deg'
+    $ASK #STEP 'Phase increment, Deg'
+$DIALOG ACTION=STOP
+
+
+SET TIME=0
+$DO INDEX=#t START=0 FINISH=#ENDPHASE INCREMENT=#STEP
+    SET TIME=#t
+    TITLE POSITION=TOPRIGHT STRING='AC = %real(#t) Deg' DATE=TOPLEFT 
+    THREED OPTION=REFRESH
+$END TYPE=DO

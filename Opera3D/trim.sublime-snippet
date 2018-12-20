@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+PICK OPTION=TOGGLE PROPERTY=UniqueName LABEL='${1:TargetBody}'
+PICK OPTION=TOGGLE PROPERTY=UniqueName LABEL='${2:ToolBody}'
+COMBINE OPERATION=TRIM +REGULAR
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>trim</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.comi</scope>
+</snippet>

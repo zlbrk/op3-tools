@@ -1,0 +1,27 @@
+<snippet>
+	<content><![CDATA[
+// >>TOC -- тег навигации	
+#_toc_s=%int(second,2)+%int(minute,2)*60+%int(hour,2)*60*60
+#_tt_s=#_toc_s-#_tic_s
+\$if #_tt_s/3600>1
+    #_tt_h=int(#_tt_s/3600)
+    #_tt_s=#_tt_s-#_tt_h*3600
+\$else
+    #_tt_h=0
+\$end if
+    
+\$if #_tt_s/60>1
+    #_tt_m=int(#_tt_s/60)
+    #_tt_s=#_tt_s-#_tt_m*60
+\$else
+    #_tt_m=0
+\$end if
+
+\$string disp_tt 'Elapsed time - %int(#_tt_h,2):%int(#_tt_m,2):%int(#_tt_s,2)'
+\$displayline '&disp_tt&'
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>toc</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.comi</scope>
+</snippet>

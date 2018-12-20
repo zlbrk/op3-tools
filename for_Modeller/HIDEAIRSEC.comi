@@ -1,0 +1,17 @@
+// Скрыть воздух и секущие поверхности
+// ===================================
+// Инициализация переменной состояния
+
+$IF %EXISTVAR(#_HideAirSec)==0
+#_HideAirSec=0
+$END IF
+
+$IF #_HideAirSec==0
+	SELECT OPTION=HIDE PROPERTY='MaterialLabel' LABEL='Air'
+	SELECT OPTION=HIDE PROPERTY=System LABEL='Sheet face'
+	#_HideAirSec=1
+$ELIF #_HideAirSec==1
+	SELECT OPTION=DEFAULT
+	#_HideAirSec=0
+$END IF
+
